@@ -1,50 +1,48 @@
+import { useContext } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { AuthContext } from "../../providers/AuthProvider";
+import { FaPlusSquare } from "react-icons/fa"; // লোগোর পাশে আইকনের জন্য (npm i react-icons)
 
 const Navbar = () => {
-    // বর্তমানে ইউজার নেই ধরে নিচ্ছি (পরে Firebase থেকে আসবে)
-    const user = null; 
+    const { user, logout } = useContext(AuthContext);
+
+    const handleLogout = () => {
+        logout()
+            .then(() => {})
+            .catch(error => console.error(error));
+    };
 
     const navOptions = (
         <>
-            <li>
-                <NavLink 
-                    to="/" 
-                    className={({ isActive }) => isActive ? "text-primary font-bold underline" : "font-semibold"}
-                >
-                    Home
-                </NavLink>
-            </li>
-            <li>
-                <NavLink 
-                    to="/available-camps" 
-                    className={({ isActive }) => isActive ? "text-primary font-bold underline" : "font-semibold"}
-                >
-                    Available Camps
-                </NavLink>
-            </li>
+            <li><NavLink to="/" className={({ isActive }) => isActive ? "text-primary font-bold" : ""}>Home</NavLink></li>
+            <li><NavLink to="/available-camps" className={({ isActive }) => isActive ? "text-primary font-bold" : ""}>Available Camps</NavLink></li>
         </>
     );
 
     return (
-        <div className="navbar bg-base-100 shadow-md px-4 md:px-12 sticky top-0 z-50">
+        <div className="navbar bg-white shadow-lg px-4 md:px-10 sticky top-0 z-[1000]">
             <div className="navbar-start">
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="4 6h16M4 12h8m-8 6h16" />
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
                         </svg>
                     </div>
-                    <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52 font-medium">
                         {navOptions}
                     </ul>
                 </div>
-                <Link to="/" className="text-2xl font-black text-primary tracking-tighter italic">
-                    MediCamp
+                {/* Logo Section */}
+                <Link to="/" className="flex items-center gap-2">
+                    <FaPlusSquare className="text-primary text-3xl" /> {/* লোগো আইকন */}
+                    <span className="text-2xl font-black tracking-tight">
+                        Medi<span className="text-primary">Camp</span>
+                    </span>
                 </Link>
             </div>
-            
+
             <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1 gap-6">
+                <ul className="menu menu-horizontal px-1 gap-6 font-semibold">
                     {navOptions}
                 </ul>
             </div>
@@ -52,27 +50,25 @@ const Navbar = () => {
             <div className="navbar-end">
                 {user ? (
                     <div className="dropdown dropdown-end">
-                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                            <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                                <img 
-                                    src={user?.photoURL || "https://i.ibb.co/mR7099X/user.png"} 
-                                    alt="User Profile" 
-                                />
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar border-2 border-primary">
+                            <div className="w-10 rounded-full">
+                                <img src={user?.photoURL} alt="User" referrerPolicy="no-referrer" />
                             </div>
                         </div>
-                        <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                            <li className="px-4 py-2 font-bold text-gray-700">
-                                {user?.displayName || "Anonymous User"}
+                        {/* mt-5 যুক্ত করা হয়েছে যাতে ড্রপডাউন নিচে নামে */}
+                        <ul tabIndex={0} className="mt-5 z-[1] p-4 shadow-2xl menu menu-sm dropdown-content bg-base-100 rounded-xl w-60 border border-gray-100">
+                            <div className="flex flex-col items-center mb-3 border-b pb-2">
+                                <p className="font-bold text-gray-800">{user?.displayName}</p>
+                                <p className="text-xs text-gray-400">{user?.email}</p>
+                            </div>
+                            <li><Link to="/dashboard" className="hover:bg-primary hover:text-white p-2 rounded-lg">Dashboard</Link></li>
+                            <li className="mt-2">
+                                <button onClick={handleLogout} className="btn btn-sm btn-error text-white w-full">Logout</button>
                             </li>
-                            <div className="divider my-0"></div>
-                            <li><Link to="/dashboard">Dashboard</Link></li>
-                            <li><button className="text-red-500 font-semibold">Logout</button></li>
                         </ul>
                     </div>
                 ) : (
-                    <Link to="/login" className="btn btn-primary btn-sm md:btn-md px-8 rounded-full">
-                        Join US
-                    </Link>
+                    <Link to="/login" className="btn btn-primary rounded-full px-8 text-white">Join US</Link>
                 )}
             </div>
         </div>
