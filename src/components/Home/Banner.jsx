@@ -1,14 +1,50 @@
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/effect-fade";
+
 const Banner = () => {
+    const slides = [
+        {
+            image: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=2070",
+            title: "Success in Rural Healthcare",
+            desc: "Providing essential medical support to those who need it most."
+        },
+        {
+            image: "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=2070",
+            title: "Impactful Medical Moments",
+            desc: "Every smile tells a story of a life changed through our camps."
+        }
+    ];
+
     return (
-        <div className="relative w-full h-[500px] bg-blue-600 flex items-center justify-center text-white overflow-hidden">
-            <div className="absolute inset-0 opacity-30">
-                <img src="https://i.ibb.co/hV7PqYV/medical-team.jpg" alt="Banner" className="w-full h-full object-cover" />
-            </div>
-            <div className="relative z-10 text-center px-4">
-                <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-tight">Saving Lives, One Camp at a Time</h1>
-                <p className="text-lg md:text-xl max-w-2xl mx-auto opacity-90">Explore our impactful success stories and see how your participation makes a difference in the community.</p>
-                <button className="btn btn-primary mt-8 px-8 rounded-full">Explore Stories</button>
-            </div>
+        <div className="h-[500px] md:h-[600px] w-full">
+            <Swiper
+                modules={[Navigation, Pagination, Autoplay, EffectFade]}
+                effect="fade"
+                navigation={true}
+                pagination={{ clickable: true }}
+                autoplay={{ delay: 5000 }}
+                loop={true}
+                className="h-full"
+            >
+                {slides.map((slide, index) => (
+                    <SwiperSlide key={index}>
+                        {/* গুরুত্বপূর্ণ: style এর ভেতরে URL সিনট্যাক্স চেক করুন */}
+                        <div 
+                            className="w-full h-full bg-cover bg-center flex items-center justify-center"
+                            style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${slide.image})` }}
+                        >
+                            <div className="text-center text-white px-4">
+                                <h2 className="text-4xl md:text-6xl font-bold mb-4">{slide.title}</h2>
+                                <p className="text-lg md:text-xl max-w-2xl mx-auto">{slide.desc}</p>
+                            </div>
+                        </div>
+                    </SwiperSlide>
+                ))}
+            </Swiper>
         </div>
     );
 };

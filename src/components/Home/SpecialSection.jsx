@@ -1,11 +1,14 @@
 const SpecialSection = () => {
     return (
-        <div className="bg-primary py-16 text-white text-center">
-            <h2 className="text-4xl font-black mb-4 italic">Be a Hero, Save Lives!</h2>
-            <p className="text-xl opacity-90 max-w-xl mx-auto mb-8">Join our volunteer team and help us organize more successful medical camps across the country.</p>
-            <button className="btn btn-secondary btn-lg rounded-full">Become a Volunteer</button>
+        <div className="relative py-24 bg-primary text-white text-center overflow-hidden">
+            <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -ml-16 -mt-16"></div>
+            <div className="relative z-10 px-4">
+                <h2 className="text-4xl md:text-5xl font-black mb-6">Become a Medical Volunteer</h2>
+                <p className="text-xl max-w-2xl mx-auto opacity-90 mb-10">Join our network of healthcare professionals and volunteers to make a real difference in underserved communities.</p>
+                <button className="btn btn-lg bg-white text-primary border-none hover:bg-gray-100 rounded-full px-12">Register Now</button>
+            </div>
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mb-32"></div>
         </div>
     );
 };
-
 export default SpecialSection;
