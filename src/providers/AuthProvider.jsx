@@ -5,13 +5,12 @@ import {
     signInWithEmailAndPassword, 
     signInWithPopup, 
     signOut, 
+    updateProfile,
     GoogleAuthProvider 
 } from "firebase/auth";
 import { auth } from "../firebase/firebase.config";
 
-// এখানে 'createContext' সরাসরি 'react' থেকে আসছে
 export const AuthContext = createContext(null);
-
 const googleProvider = new GoogleAuthProvider();
 
 const AuthProvider = ({ children }) => {
@@ -33,7 +32,13 @@ const AuthProvider = ({ children }) => {
         return signInWithPopup(auth, googleProvider);
     };
 
-    const logout = () => {
+    const updateUserProfile = (name, photo) => {
+        return updateProfile(auth.currentUser, {
+            displayName: name, photoURL: photo
+        });
+    };
+
+    const logOut = () => {
         setLoading(true);
         return signOut(auth);
     };
@@ -46,7 +51,15 @@ const AuthProvider = ({ children }) => {
         return () => unsubscribe();
     }, []);
 
-    const authInfo = { user, loading, createUser, login, googleLogin, logout };
+    const authInfo = { 
+        user, 
+        loading, 
+        createUser, 
+        login, 
+        googleLogin, 
+        logOut, // এই নামটিই DashboardLayout এ ব্যবহার হবে
+        updateUserProfile 
+    };
 
     return (
         <AuthContext.Provider value={authInfo}>

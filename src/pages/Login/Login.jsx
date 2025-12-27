@@ -3,52 +3,81 @@ import { useForm } from "react-hook-form";
 import { AuthContext } from "../../providers/AuthProvider";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
+import axiosSecure from "../../api"; 
 
 const Login = () => {
-    // AuthContext থেকে প্রয়োজনীয় ফাংশনগুলো আনা
     const { login, googleLogin } = useContext(AuthContext);
-    
-    // React Hook Form সেটআপ
-    const { register, handleSubmit, formState: { errors } } = useForm();
-    
     const navigate = useNavigate();
     const location = useLocation();
 
-    // লগইন করার পর আগের পেজে বা হোমপেজে পাঠানোর জন্য
+    // React Hook Form setup
+    const { register, handleSubmit, formState: { errors } } = useForm();
+
     const from = location.state?.from?.pathname || "/";
 
-    // ইমেইল ও পাসওয়ার্ড দিয়ে লগইন হ্যান্ডলার
-    const onSubmit = (data) => {
-        login(data.email, data.password)
-            .then((result) => {
-                console.log("Logged user:", result.user);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Welcome Back!',
-                    text: 'Login Successful',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-                navigate(from, { replace: true });
-            })
-            .catch((error) => {
-                console.error(error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Login Failed',
-                    text: 'Please check your email and password.',
-                });
+    // ১. ইমেইল ও পাসওয়ার্ড দিয়ে লগইন হ্যান্ডলার
+    const onSubmit = async (data) => {
+        try {
+            const result = await login(data.email, data.password);
+            const user = result.user;
+
+            const userInfo = {
+                email: user?.email,
+                name: user?.displayName || "Existing User"
+            };
+
+            // ডাটাবেজে ইউজার চেক/সেভ করা (এটিই আপনার কালেকশনে ইউজার নিশ্চিত করবে)
+            await axiosSecure.post('/users', userInfo);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Welcome Back!',
+                text: 'Login Successful',
+                showConfirmButton: false,
+                timer: 1500
             });
+            navigate(from, { replace: true });
+        } catch (error) {
+            console.error("Login Error:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: 'Please check your email and password.',
+            });
+        }
     };
 
-    // গুগল দিয়ে লগইন হ্যান্ডলার
-    const handleGoogleLogin = () => {
-        googleLogin()
-            .then((result) => {
-                console.log("Google user:", result.user);
-                navigate(from, { replace: true });
-            })
-            .catch((error) => console.error(error));
+    // ২. গুগল দিয়ে লগইন হ্যান্ডলার
+    const handleGoogleLogin = async () => {
+        try {
+            const result = await googleLogin();
+            const user = result.user;
+
+            const userInfo = {
+                email: user?.email,
+                name: user?.displayName,
+                photoURL: user?.photoURL
+            };
+
+            // ব্যাকএন্ডে ইউজার ডাটা পাঠানো
+            await axiosSecure.post('/users', userInfo);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Login Successful',
+                showConfirmButton: false,
+                timer: 1500
+            });
+            navigate(from, { replace: true });
+        } catch (error) {
+            console.error("Google Login Error:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Error',
+                text: 'Something went wrong with Google Login',
+            });
+        }
     };
 
     return (
@@ -57,7 +86,6 @@ const Login = () => {
                 <h2 className="text-3xl font-bold text-center text-primary mb-6">Login Now</h2>
                 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    {/* Email Field */}
                     <div className="form-control">
                         <label className="label">
                             <span className="label-text font-semibold">Email</span>
@@ -66,12 +94,11 @@ const Login = () => {
                             type="email" 
                             {...register("email", { required: "Email is required" })} 
                             placeholder="your@email.com" 
-                            className="input input-bordered focus:input-primary" 
+                            className="input input-bordered focus:input-primary w-full" 
                         />
                         {errors.email && <span className="text-red-500 text-xs mt-1">{errors.email.message}</span>}
                     </div>
 
-                    {/* Password Field */}
                     <div className="form-control">
                         <label className="label">
                             <span className="label-text font-semibold">Password</span>
@@ -80,19 +107,20 @@ const Login = () => {
                             type="password" 
                             {...register("password", { required: "Password is required" })} 
                             placeholder="******" 
-                            className="input input-bordered focus:input-primary" 
+                            className="input input-bordered focus:input-primary w-full" 
                         />
                         {errors.password && <span className="text-red-500 text-xs mt-1">{errors.password.message}</span>}
                     </div>
 
                     <div className="form-control mt-6">
-                        <button className="btn btn-primary w-full text-white font-bold">LOGIN</button>
+                        <button className="btn btn-primary w-full text-white font-bold uppercase">
+                            Login
+                        </button>
                     </div>
                 </form>
 
                 <div className="divider text-gray-400">OR</div>
 
-                {/* Google Login Button */}
                 <button 
                     onClick={handleGoogleLogin} 
                     className="btn btn-outline btn-secondary w-full flex items-center justify-center gap-2"
