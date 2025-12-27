@@ -9,25 +9,34 @@ const Login = () => {
     const { login, googleLogin } = useContext(AuthContext);
     const navigate = useNavigate();
     const location = useLocation();
-
-    // React Hook Form setup
     const { register, handleSubmit, formState: { errors } } = useForm();
 
     const from = location.state?.from?.pathname || "/";
 
-    // ১. ইমেইল ও পাসওয়ার্ড দিয়ে লগইন হ্যান্ডলার
+    // কমন ফাংশন: ইউজারের তথ্য ডাটাবেজে সেভ করার জন্য
+    const saveUserToDatabase = async (user) => {
+        const userInfo = {
+            email: user?.email,
+            name: user?.displayName || "New User",
+            photoURL: user?.photoURL
+        };
+
+        try {
+            console.log("Sending to server:", userInfo);
+            const res = await axiosSecure.post('/users', userInfo);
+            console.log("Server response:", res.data);
+            return res.data;
+        } catch (err) {
+            console.error("Database storage error:", err);
+            throw err;
+        }
+    };
+
+    // ১. ইমেইল ও পাসওয়ার্ড দিয়ে লগইন
     const onSubmit = async (data) => {
         try {
             const result = await login(data.email, data.password);
-            const user = result.user;
-
-            const userInfo = {
-                email: user?.email,
-                name: user?.displayName || "Existing User"
-            };
-
-            // ডাটাবেজে ইউজার চেক/সেভ করা (এটিই আপনার কালেকশনে ইউজার নিশ্চিত করবে)
-            await axiosSecure.post('/users', userInfo);
+            await saveUserToDatabase(result.user);
 
             Swal.fire({
                 icon: 'success',
@@ -42,25 +51,19 @@ const Login = () => {
             Swal.fire({
                 icon: 'error',
                 title: 'Login Failed',
-                text: 'Please check your email and password.',
+                text: error.message || 'Please check your email and password.',
             });
         }
     };
 
-    // ২. গুগল দিয়ে লগইন হ্যান্ডলার
+    // ২. গুগল দিয়ে লগইন
     const handleGoogleLogin = async () => {
         try {
             const result = await googleLogin();
-            const user = result.user;
-
-            const userInfo = {
-                email: user?.email,
-                name: user?.displayName,
-                photoURL: user?.photoURL
-            };
-
-            // ব্যাকএন্ডে ইউজার ডাটা পাঠানো
-            await axiosSecure.post('/users', userInfo);
+            console.log("Firebase login successful:", result.user.email);
+            
+            // ডাটাবেজে জিমেইল পাঠানো হচ্ছে
+            await saveUserToDatabase(result.user);
 
             Swal.fire({
                 icon: 'success',
@@ -75,7 +78,7 @@ const Login = () => {
             Swal.fire({
                 icon: 'error',
                 title: 'Login Error',
-                text: 'Something went wrong with Google Login',
+                text: error.response?.data?.message || error.message,
             });
         }
     };

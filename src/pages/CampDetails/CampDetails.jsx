@@ -8,7 +8,6 @@ const CampDetails = () => {
     const [camp, setCamp] = useState({});
     const [loading, setLoading] = useState(true);
 
-    // ১. ক্যাম্পের বিস্তারিত ডাটা লোড করা
     useEffect(() => {
         axiosSecure.get(`/camps/${id}`)
             .then(res => {
@@ -17,30 +16,30 @@ const CampDetails = () => {
             });
     }, [id]);
 
-    // ২. রেজিস্ট্রেশন সাবমিট করা
     const handleRegistration = async (e) => {
         e.preventDefault();
         const form = e.target;
         
         const registrationInfo = {
             campId: camp._id,
-            campName: camp.name,
-            campFees: camp.campFees,
+            name: camp.name, // ডাটাবেজে 'name' আছে
+            fees: camp.fees, // ১ নম্বর সংশোধন: 'campFees' এর বদলে 'fees' (আপনার ডাটাবেজ অনুযায়ী)
             location: camp.location,
             participantName: form.participantName.value,
             participantEmail: form.participantEmail.value,
             phoneNumber: form.phone.value,
             gender: form.gender.value,
             emergencyContact: form.emergency.value,
-            paymentStatus: "Unpaid", // ডিফল্ট স্ট্যাটাস
-            confirmationStatus: "Pending" // ডিফল্ট স্ট্যাটাস
+            paymentStatus: "Unpaid", 
+            confirmationStatus: "Pending",
+            dateTime: camp.dateTime 
         };
 
         try {
             const res = await axiosSecure.post('/registered-camps', registrationInfo);
             if (res.data.insertedId) {
                 Swal.fire("Success!", "You have registered successfully!", "success");
-                document.getElementById('join_modal').close(); // মডাল বন্ধ করা
+                document.getElementById('join_modal').close();
             }
         } catch (error) {
             Swal.fire("Error", "Registration failed. Try again.", "error");
@@ -56,17 +55,18 @@ const CampDetails = () => {
             <div className="flex justify-between items-start mb-6">
                 <div>
                     <h2 className="text-4xl font-bold text-primary mb-2">{camp.name}</h2>
-                    <p className="text-xl text-gray-600 font-medium">Professional: {camp.professionalName}</p>
+                    {/* ২ নম্বর সংশোধন: ডাটাবেজে 'healthcareProfessional' নামে ফিল্ড আছে */}
+                    <p className="text-xl text-gray-600 font-medium">Professional: {camp.healthcareProfessional}</p>
                 </div>
                 <div className="text-right">
-                    <p className="text-2xl font-bold text-green-600">${camp.campFees}</p>
-                    <p className="text-sm text-gray-500">{camp.dateTime}</p>
+                    {/* ৩ নম্বর সংশোধন: ডাটাবেজ অনুযায়ী 'fees' ব্যবহার করুন */}
+                    <p className="text-2xl font-bold text-green-600">${camp.fees}</p>
+                    <p className="text-sm text-gray-500">{new Date(camp.dateTime).toLocaleString()}</p>
                 </div>
             </div>
 
             <p className="text-gray-700 leading-relaxed mb-8 text-lg">{camp.description}</p>
 
-            {/* Join Camp Button - এটি ক্লিক করলে নিচের মডাল খুলবে */}
             <button 
                 onClick={() => document.getElementById('join_modal').showModal()} 
                 className="btn btn-primary btn-lg w-full text-white font-bold"
@@ -74,7 +74,6 @@ const CampDetails = () => {
                 Join Camp
             </button>
 
-            {/* --- Registration Modal Start --- */}
             <dialog id="join_modal" className="modal modal-bottom sm:modal-middle">
                 <div className="modal-box">
                     <h3 className="font-bold text-2xl text-center mb-6">Register for {camp.name}</h3>
@@ -87,8 +86,8 @@ const CampDetails = () => {
                         <input type="text" name="phone" placeholder="Phone Number" className="input input-bordered w-full" required />
                         
                         <div className="grid grid-cols-2 gap-4">
-                            <select name="gender" className="select select-bordered w-full" required>
-                                <option disabled selected>Gender</option>
+                            <select name="gender" className="select select-bordered w-full" required defaultValue="">
+                                <option value="" disabled>Gender</option>
                                 <option>Male</option>
                                 <option>Female</option>
                                 <option>Other</option>
@@ -104,7 +103,6 @@ const CampDetails = () => {
                     <button onClick={() => document.getElementById('join_modal').close()} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </div>
             </dialog>
-            {/* --- Registration Modal End --- */}
         </div>
     );
 };
